@@ -1,4 +1,27 @@
-# Anki Flashcard Generator API and n8n Integration
+# StudyHack.AI
+
+Authors: Alex Castillo, Thomas Phommarath, Zipporah Nellum, Joshwa Mputu
+
+## Inspiration
+
+Creating study material and a study system is hard. On top of feeling like your studying has been wasted due to bad study habits and techniques. We at StudyHack wanted to change this.
+
+## What it does
+
+StudyHack takes your course syllabus and course topics and builds a study guide and material that integrates into your calendar for easy access, saving students time for higher-impact tasks. The study guide focuses on implementing science-backed study practices along with analysis and feedback for your strengths and weaknesses. The created study material is created and imported into Anki to leverage on-the-go studying and its spaced repetition platform. This application learns from you so you can achieve your best results.
+
+## How we built it
+
+We worked up a game plan of features and split the work between our team members. We worked in our own workflows to later merge our n8n pipeline, integrated Google services along with a custom API for building flashcards in Anki. The API was created with FastAPI and locally hosted for demo interactions.
+
+
+![n8n-monolith-workflow](./static/fulln8nworkflow.png)
+<!-- ![n8n-brains-workflow](./static/brains-calender.png)
+![n8n-anki-workflow](./static/anki-ai-flashcard-gen.png)
+![n8n-monolith-workflow](./static/pomodoro-feedback.png) -->
+
+
+## Anki Flashcard Generator API and n8n Integration
 
 A FastAPI service that creates Anki decks and Basic (Front/Back) flashcards via [AnkiConnect](https://git.sr.ht/~foosoft/anki-connect).
 
@@ -10,11 +33,37 @@ A FastAPI service that creates Anki decks and Basic (Front/Back) flashcards via 
   - The Anki desktop must be open on your device for the flashcard generator to work.
 3. Docker (https://www.docker.com/)
 
+## Setup n8n cloud hosted and FastAPI localhost Cloudflare tunneling
+
+run the commands
+
+```
+uvicorn main:app --reload
+```
+
+```
+cloudflared tunnel --url http://localhost:8000
+```
+grab the tunneling url and paste it into the url for http, create anki cards node, requests on n8n
+
+
 ## Setup (Docker)
 
 ```bash
 docker compose up
 ```
+
+```API http://0.0.0.0:8000/docs```
+```n8n http://localhost:5678/```
+
+
+
+### Aside If you cannot see the workflow
+In the local n8n menu
+1) Create a new workflow
+2) Click on the horizontal 3 dots on the top right hand corner
+3) Click import from file
+4) Upload the Monolith-lynx-hack.json file from the repository
 
 ## Environment Variable Integration (TODO)
 
@@ -85,8 +134,5 @@ curl -X POST http://localhost:8000/create-deck \
   }'
 ```
 
-### Using cloudfare tunneling for n8n interaction
+## n8n workflow
 
-cloudflared tunnel --url http://localhost:8000
-
-grab the tunneling url and paste it into the url for http, create anki cards node, requests on n8n
