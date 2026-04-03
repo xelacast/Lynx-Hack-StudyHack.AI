@@ -1,0 +1,46 @@
+services:
+  n8n:
+    image: lynx-haxk-2026-n8n
+    build: .
+    restart: always
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_HOST=localhost
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+      - NODE_ENV=production
+      # --- NEW: Tell n8n to use an external Python runner ---
+      - N8N_RUNNERS_ENABLED=true
+      - N8N_RUNNERS_MODE=external
+      - N8N_RUNNERS_BROKER_LISTEN_ADDRESS=0.0.0.0
+      - N8N_RUNNERS_BROKER_PORT=5679
+      - N8N_RUNNERS_AUTH_TOKEN=my_secure_token_123
+    volumes:
+      - n8n_data:/home/node/.n8n
+      - ./local_scripts:/scripts # Drop your python scripts in a local folder called 'local_scripts'
+
+# --- NEW: The official n8n Task Runner container ---
+  n8n-python-runner:
+    image: n8nio/runners:latest
+    restart: always
+    environment:
+      - N8N_RUNNERS_TASK_BROKER_URI=http://n8n:5679
+      - N8N_RUNNERS_AUTH_TOKEN=my_secure_token_123 # This MUST match the token above!
+    depends_on:
+      - n8n
+
+  anki-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      - ANKI_CONNECT_URL=http://host.docker.internal:8765
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+volumes:
+  n8n_data:

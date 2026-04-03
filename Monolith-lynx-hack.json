@@ -1,0 +1,1453 @@
+{
+  "name": "Monolith-lynx-hack",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "# Anki AI FlashCard Generator",
+        "height": 636,
+        "width": 2092,
+        "color": "#32373E"
+      },
+      "id": "de749b46-6313-420d-88a6-305242a41a2b",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        816,
+        -816
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolName": "knowledge_base",
+        "toolDescription": "Use this knowledge base to answer questions from the user",
+        "memoryKey": {
+          "__rl": true,
+          "mode": "list",
+          "value": "vector_store_key"
+        }
+      },
+      "id": "f1ae45f0-8847-4f63-84c6-2985fa1c5f5a",
+      "name": "Query Data Tool",
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+      "position": [
+        1104,
+        -448
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"topic\": \"string\",\n  \"cards\": {\n    \"questions\": [\n      \"string\"\n    ],\n    \"answers\": [\n      \"string\"\n    ],\n    \"tags\": [\"strings\"]\n  }\n}",
+        "autoFix": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1376,
+        -512
+      ],
+      "id": "571fdce8-3291-4503-91f7-5c119e8ea8b7",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "language": "pythonNative",
+        "pythonCode": "# Loop over input items and add a new field called 'my_new_field' to the JSON of each one\nreturn \"DONE\""
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2624,
+        -688
+      ],
+      "id": "52e98c57-5e9e-4a1b-b5dc-164124c4ee42",
+      "name": "DONE"
+    },
+    {
+      "parameters": {
+        "dataType": "binary",
+        "options": {}
+      },
+      "id": "524757e3-eea9-44d6-b077-8dcc102fcb49",
+      "name": "Default Data Loader",
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "position": [
+        1152,
+        64
+      ],
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        1104,
+        -304
+      ],
+      "id": "74f3c8ab-c90a-4831-aa41-f14227fee4af",
+      "name": "Embeddings OpenAI1",
+      "credentials": {
+        "openAiApi": {
+          "id": "h7yWwWEo4sEWshVG",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "text",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        848,
+        -1264
+      ],
+      "id": "81368ef2-175a-4b8e-bc51-b6a1ffe9afd1",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "advanced": true,
+        "mergeByFields": {
+          "values": [
+            {
+              "field1": "data",
+              "field2": "text"
+            }
+          ]
+        },
+        "joinMode": "keepEverything",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1072,
+        -1264
+      ],
+      "id": "adb16df5-0d7e-4d1a-9ecb-1010ccca5a59",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nlet syllabus; \nlet source_material;\n// console.log($input.all())\nfor (const item of $input.all()) {\n  let content = item[\"json\"];\n  if (\"data\" in content) {\n    syllabus = content[\"data\"];\n  }\n  if (\"text\" in content) {\n    source_material = content[\"text\"]\n  }\n}\nconsole.log(\"source material\", source_material)\n// let merger = {\"syllabus\": syllabus, \"source_material\": source_material }\n// console.log(merger)\nreturn {\"syllabus\": syllabus, \"source_material\": source_material }"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1296,
+        -1264
+      ],
+      "id": "bcb496fa-e709-48f4-b074-df95bbe8dc09",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "jhuiicebox@gmail.com",
+          "mode": "list",
+          "cachedResultName": "jhuiicebox@gmail.com"
+        },
+        "start": "={{ new Date(\"2026-04-03T17:00:00\") }}",
+        "end": "={{ new Date(\"2026-04-03T17:00:00\").plus(1, 'hour') }}",
+        "additionalFields": {
+          "color": "7",
+          "description": "=Study Session: {{ $json.output.topic }}",
+          "summary": "={{ $json.output.description }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        2096,
+        -1264
+      ],
+      "id": "03980ca9-a752-44ed-aea6-697a758843d6",
+      "name": "Create an event",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "CP71HiXOuHt7NKLk",
+          "name": "Google Calendar account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.syllabus }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are a syllabus parser. The user will provide the text of a course syllabus. Your job is to identify ONE subject or topic from the syllabus and schedule a study session for it.\n\n## Rules\n1. Read the entire syllabus carefully.\n2. Select the single most immediately relevant or upcoming topic (e.g., the next lecture, the next assignment due, or the first major unit).\n3. Write a concise but informative description of what a student should focus on during a study session for that topic.\n4. The study time is always 1:00 PM – 2:00 PM on the next calendar day from today.\n\n## Output Format\nRespond with ONLY a valid JSON object — no markdown fences, no preamble, no extra text. Use this exact schema:\n\n{\n  \"topic\": \"<short name of the subject or unit>\",\n  \"description\": \"<1-2 sentence summary of what to study and why>\",\n  \"time\": \"<ISO 8601 datetime for the start of the session, e.g. 2026-04-03T13:00:00>\"\n}\n\n## Example\nGiven a syllabus that lists \"Chapter 4: Thermodynamics\" as the next upcoming unit, you might return:\n\n{\n  \"topic\": \"Thermodynamics\",\n  \"description\": \"Review the first and second laws of thermodynamics and practice enthalpy calculation problems from Chapter 4.\",\n  \"time\": \"2026-04-03T13:00:00\"\n}\n\nUSE TIME "
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1744,
+        -1264
+      ],
+      "id": "4f85b3dd-3cbe-46f4-bece-ae3d09bd9cd5",
+      "name": "AI Agent1"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        1728,
+        -1072
+      ],
+      "id": "70598471-1b85-403c-b69a-78ac9a5aa6e3",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "h7yWwWEo4sEWshVG",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"topic\": \"string\",\n  \"description\": \"string\",\n  \"time\" : \"Date\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1904,
+        -1072
+      ],
+      "id": "f3234275-34a6-45ee-ba2d-80dae62c950c",
+      "name": "Structured Output Parser1"
+    },
+    {
+      "parameters": {
+        "content": "# Brains And Google Calendar Integration",
+        "height": 592,
+        "width": 1520
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        816,
+        -1456
+      ],
+      "typeVersion": 1,
+      "id": "4c96820c-0992-45bf-81eb-5bb53dd92dff",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "formTitle": "Pomodoro Study Session",
+        "formDescription": "Set up your study and break times",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Study minutes",
+              "fieldType": "number",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Break minutes",
+              "fieldType": "number",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Subject",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Modern Physics"
+                  },
+                  {
+                    "option": "Quantum Physics"
+                  },
+                  {
+                    "option": "Thermo Physics"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "9f2f570f-cc12-4d43-9115-17afdf91fa4c",
+      "name": "On Form Submission",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        1504,
+        320
+      ],
+      "webhookId": "40b9ade7-4c97-4731-8425-9b83b7558673"
+    },
+    {
+      "parameters": {},
+      "id": "33b9d1e0-affc-4df0-968f-323ff29b5b05",
+      "name": "Wait — Halfway Point",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1728,
+        512
+      ],
+      "webhookId": "wait-halfway-webhook"
+    },
+    {
+      "parameters": {},
+      "id": "68f1f24d-d9dd-42a1-9819-b66631d5ef71",
+      "name": "Wait — Study Time",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1936,
+        320
+      ],
+      "webhookId": "wait-study-webhook"
+    },
+    {
+      "parameters": {},
+      "id": "fba72718-3d26-47ff-820c-e1c0b0a442a7",
+      "name": "Wait — Break Time",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        2400,
+        320
+      ],
+      "webhookId": "wait-break-webhook"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b1",
+              "name": "message",
+              "value": "={{ '⏱ Halfway there! About ' + $('Set Timer').item.json.halfwayMinutes + ' minutes left in your study session. Keep it up! 💪' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "8f8a99d7-6bba-4bc1-b494-536e88726150",
+      "name": "Halfway Message",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1936,
+        512
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c1",
+              "name": "message",
+              "value": "={{ ' Study session complete! You studied for ' + $('Set Timer').item.json.studyMinutes + ' minutes. Break time: ' + $('Set Timer').item.json.breakMinutes + ' minutes starting now. Relax and stretch! ' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "987ddea4-d618-4a4b-aa3d-5ecc3de0920b",
+      "name": "Break Message",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2160,
+        512
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1mwZXXPoqY121nBlJ0aYEIfXv6llf5BDmiErr9oPW4P8",
+          "mode": "list",
+          "cachedResultName": "Pomodoro Sessions",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1mwZXXPoqY121nBlJ0aYEIfXv6llf5BDmiErr9oPW4P8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1mwZXXPoqY121nBlJ0aYEIfXv6llf5BDmiErr9oPW4P8/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "studyMinutes",
+              "displayName": "studyMinutes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "breakMinutes",
+              "displayName": "breakMinutes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "startTime",
+              "displayName": "startTime",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "sessionNumber",
+              "displayName": "sessionNumber",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "halfwayMinutes",
+              "displayName": "halfwayMinutes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "1ecdc122-2c5c-4b78-a202-59d490303ed5",
+      "name": "Log to Google Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        2832,
+        320
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "bmfuJWnLZTUQEWbI",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d1",
+              "name": "message",
+              "value": "={{ 'Break time is over! Session #' + $('Set Timer').item.json.sessionNumber + ' has been logged! Ready for another round? Submit the form again to start a new Pomodoro!' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "44ea522a-d34a-46c3-b088-1ceb2acf0c3f",
+      "name": "Done Message",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2400,
+        512
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1",
+              "name": "studyMinutes",
+              "value": "={{ $json['Study minutes'] }}",
+              "type": "number"
+            },
+            {
+              "id": "a2",
+              "name": "breakMinutes",
+              "value": "={{ $json['Break minutes'] }}",
+              "type": "number"
+            },
+            {
+              "id": "a3",
+              "name": "startTime",
+              "value": "={{ new Date().toISOString() }}",
+              "type": "string"
+            },
+            {
+              "id": "a4",
+              "name": "sessionNumber",
+              "value": 1,
+              "type": "number"
+            },
+            {
+              "id": "a5",
+              "name": "status",
+              "value": "running",
+              "type": "string"
+            },
+            {
+              "id": "a6",
+              "name": "halfwayMinutes",
+              "value": "={{ Math.round($json['Study minutes'] / 2) }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c96b0cf4-77be-4330-a490-d5a4f20208f0",
+      "name": "Set Timer",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1728,
+        320
+      ],
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=I want to learn about {{ $('Study Entry').item.json.class_name }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "# Feynman Technique Evaluation Agent — System Prompt\n\n---\n\n## Role & Identity\n\nYou are a **Feynman Learning Coach** — an AI tutor that evaluates college/university students' understanding of topics by analyzing their Feynman-style explanations. You cross-reference their claims against verified source material retrieved from a knowledge base, then return structured feedback that is encouraging, specific, and actionable.\n\nYour tone is **warm and growth-oriented**. You treat every attempt as progress, celebrate what the student got right, and frame errors as learning opportunities — never as failures.\n\n---\n\n## Input Format\n\nThe student sends a **chat message** containing two things:\n\n1. **The topic and/or question** they are explaining (stated upfront).\n2. **Their Feynman-style explanation** — an attempt to explain the concept in their own words, as if teaching it to someone else.\n\nIf the student's message is missing either component, ask them to clarify before evaluating. For example:\n- If no topic is stated: *\"Great explanation! Before I evaluate it, could you tell me what topic or question you're trying to answer?\"*\n- If no explanation is given: *\"Got it — you want to work on [topic]. Go ahead and explain it in your own words like you're teaching it to a friend, and I'll give you feedback.\"*\n\n---\n\n## Evaluation Process\n\n### Step 1 — Extract Claims\n\nBreak the student's explanation into discrete, evaluable **claims**. A claim is any factual assertion, causal relationship, definition, process step, or quantitative statement. Aim for granularity — one idea per claim. Ignore filler language, hedging, and rhetorical framing.\n\n### Step 2 — Retrieve Source Material\n\nFor **each claim**, query the knowledge base (vector DB tool) to retrieve the most relevant source excerpts. Use targeted queries that isolate the specific concept in the claim.\n\n- If you get a strong match → proceed to evaluation.\n- If no relevant content is returned → flag the claim as `\"unverifiable\"`.\n\n### Step 3 — Evaluate Each Claim\n\nCompare the student's claim against the retrieved source material using **moderate strictness**:\n\n- Accept reasonable paraphrasing and imprecise but directionally accurate language.\n- Reward demonstrated understanding even if terminology isn't textbook-perfect.\n- Mark as incorrect only when the claim contradicts the source or reflects a genuine misconception.\n\nUse this **5-tier rating scale** for each claim:\n\n| Status | When to Use |\n|---|---|\n| `correct` | The claim accurately reflects the source material. |\n| `mostly_correct` | The core idea is right but has a minor imprecision, omission, or oversimplification that doesn't indicate a misconception. |\n| `partially_correct` | The claim contains a mix of accurate and inaccurate elements, or captures part of the concept but misses critical aspects. |\n| `incorrect` | The claim contradicts the source material or reflects a clear misconception. |\n| `unverifiable` | No relevant source material was found in the knowledge base to confirm or deny this claim. |\n\n### Step 4 — Score\n\nCalculate the overall score as **points out of 10**, based on the proportion and severity of claim statuses:\n\n- `correct` = full weight\n- `mostly_correct` = ~80% weight\n- `partially_correct` = ~50% weight\n- `incorrect` = 0% weight\n- `unverifiable` = excluded from scoring (do not penalize)\n\nRound to the nearest integer. Express as `\"X/10\"`.\n\n### Step 5 — Determine Overall Verdict\n\nBased on the score and the pattern of claims:\n\n| Verdict | Condition |\n|---|---|\n| `correct` | 9-10/10, no incorrect claims |\n| `mostly_correct` | 7-8/10, no more than one incorrect claim |\n| `partially_correct` | 4-6/10, or a mix of correct and incorrect claims |\n| `incorrect` | 0-3/10, majority of claims are wrong |\n| `unverifiable` | Majority of claims could not be verified against the knowledge base |\n\n### Step 6 — Write Feedback\n\nWrite a **2-4 sentence feedback paragraph** that:\n\n1. **Leads with what the student got right** — be specific about which concepts they demonstrated understanding of.\n2. **Addresses gaps or errors constructively** — frame as \"here's what to look at next\" rather than \"you got this wrong.\"\n3. **Connects to the bigger picture** — help them see how the corrected understanding fits into the broader topic.\n\nUse encouraging, coach-like language appropriate for college students. Avoid being patronizing.\n\n### Step 7 — Identify Weak Areas & Suggest Resources\n\nBased on the evaluation:\n\n- Identify **1-3 weak areas** as topic tags (e.g., `\"mitochondrial_function\"`, `\"krebs_cycle_location\"`). These should be specific enough to track over time.\n- Suggest **1-3 concrete next study actions** — these should be specific and actionable (e.g., \"Review the electron transport chain diagram in Chapter 7\" or \"Try explaining the difference between glycolysis and the Krebs cycle location\").\n\n---\n\n## Output Format\n\nYou MUST respond with **valid JSON only** — no markdown fences, no preamble, no commentary outside the JSON object.\n\n```json\n{\n  \"topic\": \"<topic the student is explaining>\",\n  \"question\": \"<the specific question or subtopic, inferred or stated>\",\n  \"overall_verdict\": \"correct | mostly_correct | partially_correct | incorrect | unverifiable\",\n  \"score\": \"<X/10>\",\n  \"claims\": [\n    {\n      \"claim\": \"<the student's assertion, paraphrased concisely>\",\n      \"status\": \"correct | mostly_correct | partially_correct | incorrect | unverifiable\",\n      \"source_excerpt\": \"<relevant excerpt from the knowledge base, or null if unverifiable>\",\n      \"explanation\": \"<why this claim received this rating — specific, constructive>\"\n    }\n  ],\n  \"feedback\": \"<2-4 sentence growth-mindset summary>\",\n  \"weak_areas\": [\n    \"<topic_tag_1>\",\n    \"<topic_tag_2>\"\n  ],\n  \"suggested_actions\": [\n    \"<specific study action 1>\",\n    \"<specific study action 2>\"\n  ]\n}\n```\n\n---\n\n## Rules & Edge Cases\n\n1. **Always query the knowledge base before evaluating.** Never evaluate claims from your own knowledge — the source of truth is the vector DB.\n2. **No source found?** Set status to `\"unverifiable\"`, set `source_excerpt` to `null`, and explain that the claim couldn't be verified against available materials. Do not guess.\n3. **Student is vague or rambling?** Extract whatever discrete claims you can. If nothing is evaluable, return a response with an empty `claims` array and feedback asking them to be more specific.\n4. **Student asks a question instead of explaining?** Redirect them: *\"The Feynman technique works best when you explain the concept — try teaching it to me, and I'll tell you how you did.\"* Return this as the `feedback` field with `overall_verdict: null` and `score: null`.\n5. **Multiple topics in one message?** Evaluate the primary topic. If a secondary topic is intertwined, note it in feedback and suggest they explain it separately next time.\n6. **Output must be parseable JSON.** No trailing commas, no comments, no markdown formatting. The output is consumed by an n8n workflow.\n\n---\n\n## Tone Examples\n\n**Good (growth-mindset):**\n> \"You nailed the core concept of osmosis — the idea of water moving across a membrane toward higher solute concentration shows solid understanding. One thing to revisit: osmosis specifically refers to water movement, not solute movement. Try re-explaining with that distinction and you'll have this locked down.\"\n\n**Bad (clinical/punitive):**\n> \"Incorrect. Osmosis refers to water movement, not solute movement. Your answer demonstrates a fundamental misunderstanding.\"\n\n**Bad (patronizing):**\n> \"Great try! You're so close! Don't worry, everyone gets this wrong at first!\"\n\n---\n\n## Knowledge Base Tool Usage\n\nWhen calling the knowledge base retrieval tool:\n\n- **Query per claim** — don't batch all claims into one query.\n- **Use the student's terminology** in the query to find the most relevant match.\n- **If the first query returns poor results**, try rephrasing with more standard terminology.\n- **Return the most relevant excerpt** — keep it concise (1-2 sentences max in `source_excerpt`)."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        2384,
+        -112
+      ],
+      "id": "02987ef0-9c02-42e8-82b0-c60e93c854b1",
+      "name": "Feedback Agent"
+    },
+    {
+      "parameters": {},
+      "id": "5b4011af-1c4d-4701-bb55-df0e8cded340",
+      "name": "Wait — Feynmann Technique",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        2160,
+        320
+      ],
+      "webhookId": "wait-break-webhook"
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 15
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        2480,
+        112
+      ],
+      "id": "ac719f5e-4a49-4caf-a2c3-690af2297f3b",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "content": "# Pomodoro Technique and AI assisted Feedback",
+        "height": 912,
+        "width": 1664,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1392,
+        -128
+      ],
+      "typeVersion": 1,
+      "id": "eb8f5cda-2875-4cd8-905e-09223af5f799",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "formTitle": "Syllabus",
+        "formDescription": "Upload your syllabus and source material!",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Study Information",
+              "fieldType": "file",
+              "fieldName": "data",
+              "acceptFileTypes": ".jpg, .png, .pdf, .docx, .txt",
+              "requiredField": true
+            },
+            {
+              "fieldType": "hiddenField",
+              "fieldName": "sessionId",
+              "fieldValue": "source_material"
+            },
+            {
+              "fieldLabel": "Source Material",
+              "fieldType": "file",
+              "fieldName": "source_material",
+              "acceptFileTypes": ".pdf, .txt",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Class Name",
+              "fieldName": "class_name",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.5,
+      "position": [
+        496,
+        -864
+      ],
+      "id": "67d94ac5-5c5f-4b63-bf89-928f528d5148",
+      "name": "Study Entry",
+      "webhookId": "29a590de-56b5-4977-8812-fc8d44f40da8"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.text }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are a professional flash card creator who uses long-term memorization techniques.\n\nYour goal is to transform dense academic content, given by the user, into high-quality Anki cards that build deep understanding — not surface memorization.\n\n\n═══════════════════════════════════════\nCORE PRINCIPLES\n═══════════════════════════════════════\n\n1. MINIMUM INFORMATION: Each card tests exactly one atomic idea. Split compound concepts into separate cards.\n2. OPTIMIZED WORDING: Phrase questions so the answer feels inevitable once understood — not guessable by pattern matching.\n3. CONCEPTUAL DEPTH: Prioritize the *why* and *how* behind equations over restating definitions.\n4. CONNECTIONS: Explicitly card the bridges between concepts — these are the most valuable card type.\n\n═══════════════════════════════════════\nCARD TYPES — use all that apply\n═══════════════════════════════════════\n\n[CONCEPT]   Tests understanding of a definition or physical principle\n[EQUATION]  Tests recall or derivation of a key equation\n[INTUITION] Tests the physical reasoning behind a result\n[DERIVE]    Tests a key step or logical leap in a derivation\n[CONNECT]   Tests the relationship between two distinct concepts\n[APPLY]     Tests application of a concept to a specific scenario\n\n═══════════════════════════════════════\nMATH FORMATTING\n═══════════════════════════════════════\n- Always use \\\\( ... \\\\) for inline math — never $...$ or $$...$$\n- Use full LaTeX: \\\\frac{}{}, \\\\sqrt{}, \\\\int, \\\\sum, \\\\partial, \\\\nabla, \\\\cdot\n- Never leave an equation without a brief label explaining what it represents\n- When an equation has named variables, define them on first appearance\n\n═══════════════════════════════════════\nOUTPUT FORMAT\n═══════════════════════════════════════\n- Do NOT write \"Question:\" or \"Answer:\" labels\n- Every question must end with a question mark ?\nSTRUCTURED OUTPUT IN JSON\n<structure>\n{\n  \"topic\": \"string\",\n  \"cards\": {\n    \"questions\": [\n      \"string\"\n    ],\n    \"answers\": [\n      \"string\"\n    ],\n    \"tags\": []\n  }\n}\n<structure>\n\nTAGS are shared across cards\nEACH QUESTION and ANSWER PAIR SHALL BE THE SAME INDEX in their appropriate arrays\n\n\n═══════════════════════════════════════\nCONTENT PRIORITIES (in order)\n═══════════════════════════════════════\n1. Fundamental principles and their physical meaning\n2. Key equations and what each term represents\n3. Derivation logic and critical steps\n4. Connections between concepts (especially cross-chapter links)\n5. Counterintuitive results worth flagging\n6. Concrete examples that illuminate a principle\n\nWHAT TO SKIP:\n- Biographical trivia, purely administrative text\n- Numerical answers to specific textbook problems\n- Definitions fully contained in the term itself\n\nCARD COUNT:\n- 20–40 cards per section; up to 60 for dense derivations\n- Always include at least 3 [CONNECT] cards per major section\n- Quality over quantity — but err on the side of more coverage, not less\n\nNO REPETITION:\n- Every card must test a distinct, unique idea — no two cards may ask the same question in different words\n- Do not restate the same equation across multiple cards unless each card tests a genuinely different aspect (e.g., one tests recall, another tests a specific term's meaning)\n- Before writing each card, check it against all prior cards in this batch — if it overlaps, skip it or find a more specific angle"
+        }
+      },
+      "id": "634e9a99-e65e-4e7b-8d66-1c2a0b7ba87e",
+      "name": "Agent AnkiGen",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        1072,
+        -752
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://tutorial-spouse-seen-presentations.trycloudflare.com/create-deck",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.output }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1744,
+        -752
+      ],
+      "id": "9f91b0ed-c990-4f2a-92e5-7f5ea47bfa57",
+      "name": "Create Anki Cards"
+    },
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "message": "Your anki cards have been uploaded, try again?",
+        "responseType": "approval",
+        "approvalOptions": {
+          "values": {
+            "approvalType": "double"
+          }
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chat",
+      "typeVersion": 1.3,
+      "position": [
+        2176,
+        -656
+      ],
+      "id": "bcf90011-ec6f-498f-ad9a-e38c822a9d30",
+      "name": "Try Again?",
+      "webhookId": "3aa97577-5bec-45b1-947a-a3b6a315003b"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "341699b5-8f3e-48f2-82ab-9e7f21be8d95",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "success",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1952,
+        -752
+      ],
+      "id": "f8fc0387-8385-4ef7-844f-3ef665facbdd",
+      "name": "If success"
+    },
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "message": "Your anki cards have been created and uploaded!",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chat",
+      "typeVersion": 1.3,
+      "position": [
+        2400,
+        -768
+      ],
+      "id": "e9537901-d7d1-4276-ba3e-83bc4c9320b6",
+      "name": "Notification",
+      "webhookId": "3aa97577-5bec-45b1-947a-a3b6a315003b"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"topic\": \"<topic the student is explaining>\",\n  \"question\": \"<the specific question or subtopic, inferred or stated>\",\n  \"overall_verdict\": \"correct | mostly_correct | partially_correct | incorrect | unverifiable\",\n  \"score\": \"<X/10>\",\n  \"claims\": [\n    {\n      \"claim\": \"<the student's assertion, paraphrased concisely>\",\n      \"status\": \"correct | mostly_correct | partially_correct | incorrect | unverifiable\",\n      \"source_excerpt\": \"<relevant excerpt from the knowledge base, or null if unverifiable>\",\n      \"explanation\": \"<why this claim received this rating — specific, constructive>\"\n    }\n  ],\n  \"feedback\": \"<2-4 sentence growth-mindset summary>\",\n  \"weak_areas\": [\n    \"<topic_tag_1>\",\n    \"<topic_tag_2>\"\n  ],\n  \"suggested_actions\": [\n    \"<specific study action 1>\",\n    \"<specific study action 2>\"\n  ]\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        2608,
+        96
+      ],
+      "id": "7d5b5591-d10c-4376-b090-1d6a72cd9739",
+      "name": "Structured Output Parser2"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "memoryKey": {
+          "__rl": true,
+          "mode": "list",
+          "value": "vector_store_key",
+          "cachedResultName": "vector_store_key"
+        }
+      },
+      "id": "b936e40e-6ab0-4229-b8b6-191fbb5a372c",
+      "name": "Mitochondria",
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+      "position": [
+        1104,
+        -112
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "binaryPropertyName": "source_material",
+        "options": {
+          "joinPages": true
+        }
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        656,
+        -528
+      ],
+      "id": "c629c635-4c12-4eea-b903-70b055631d82",
+      "name": "Material Extractor"
+    },
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "message": "Help Me study about ",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chat",
+      "typeVersion": 1.3,
+      "position": [
+        2160,
+        0
+      ],
+      "id": "c30f56c9-bdf6-4851-ba5e-93f4c044619f",
+      "name": "Feynman Chat",
+      "webhookId": "35c6c77e-1c48-4461-a0ca-5a0e91b2bfc1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "7470f5d9-478a-4aa6-8e41-b8b1c98ad13d",
+              "leftValue": "={{ $json.data.approved }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2400,
+        -592
+      ],
+      "id": "095414d8-80df-4430-a6ea-efac4aef1ead",
+      "name": "If Try Again"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        1376,
+        -352
+      ],
+      "id": "c0363bde-07fe-4997-901e-2a5c7078b69e",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "h7yWwWEo4sEWshVG",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "claude-sonnet-4-6",
+          "mode": "list",
+          "cachedResultName": "Claude Sonnet 4.6"
+        },
+        "options": {
+          "maxTokensToSample": 8000,
+          "thinking": true,
+          "thinkingBudget": 2000
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        2352,
+        96
+      ],
+      "id": "cb61c69c-3a7c-43ae-b7ac-e3cdfcfa7594",
+      "name": "Anthropic Chat Model",
+      "credentials": {
+        "anthropicApi": {
+          "id": "qYCFO0VLFJpAk4AD",
+          "name": "Anthropic account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "claude-sonnet-4-6",
+          "mode": "list",
+          "cachedResultName": "Claude Sonnet 4.6"
+        },
+        "options": {
+          "maxTokensToSample": 8000,
+          "thinking": true,
+          "thinkingBudget": 2200
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        1072,
+        -576
+      ],
+      "id": "dd981166-cd6e-4ff9-aef7-7890d03a5a33",
+      "name": "Anthropic Chat Model1",
+      "credentials": {
+        "anthropicApi": {
+          "id": "qYCFO0VLFJpAk4AD",
+          "name": "Anthropic account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "value": "SAG8kwES2osC7sAL",
+          "mode": "list",
+          "cachedResultName": "SourceMaterial",
+          "cachedResultUrl": "/projects/XngtSuswfFFAenVa/datatables/SAG8kwES2osC7sAL"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "syllabus": "={{ $json.syllabus }}",
+            "class_name": "={{ $('Study Entry').item.json.class_name }}",
+            "source_material": "={{ $json.source_material }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "syllabus",
+              "displayName": "syllabus",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "class_name",
+              "displayName": "class_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "source_material",
+              "displayName": "source_material",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "optimizeBulk": false
+        }
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1520,
+        -1264
+      ],
+      "id": "aa5a32db-a89b-424c-be12-8e00e1958842",
+      "name": "Insert Into Brain (DB)"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Query Data Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agent AnkiGen",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Agent AnkiGen",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Mitochondria",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI1": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Query Data Tool",
+            "type": "ai_embedding",
+            "index": 0
+          },
+          {
+            "node": "Mitochondria",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Insert Into Brain (DB)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "Create an event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser1": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "On Form Submission": {
+      "main": [
+        [
+          {
+            "node": "Set Timer",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Feynman Chat",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait — Halfway Point": {
+      "main": [
+        [
+          {
+            "node": "Halfway Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait — Study Time": {
+      "main": [
+        [
+          {
+            "node": "Break Message",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Wait — Feynmann Technique",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Feynman Chat",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait — Break Time": {
+      "main": [
+        [
+          {
+            "node": "Log to Google Sheets",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Done Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Timer": {
+      "main": [
+        [
+          {
+            "node": "Wait — Study Time",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Wait — Halfway Point",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Feedback Agent": {
+      "main": [
+        [
+          {
+            "node": "Log to Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait — Feynmann Technique": {
+      "main": [
+        [
+          {
+            "node": "Wait — Break Time",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Feedback Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Study Entry": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Material Extractor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agent AnkiGen": {
+      "main": [
+        [
+          {
+            "node": "Create Anki Cards",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Anki Cards": {
+      "main": [
+        [
+          {
+            "node": "If success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Try Again?": {
+      "main": [
+        [
+          {
+            "node": "If Try Again",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If success": {
+      "main": [
+        [
+          {
+            "node": "Notification",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Try Again?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notification": {
+      "main": [
+        [
+          {
+            "node": "DONE",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser2": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Feedback Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mitochondria": {
+      "main": [
+        [
+          {
+            "node": "Feedback Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Material Extractor": {
+      "main": [
+        [
+          {
+            "node": "Agent AnkiGen",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Mitochondria",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Feynman Chat": {
+      "main": [
+        [
+          {
+            "node": "Feedback Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Try Again": {
+      "main": [
+        [
+          {
+            "node": "Create Anki Cards",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "DONE",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Structured Output Parser",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anthropic Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Feedback Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anthropic Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Agent AnkiGen",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert Into Brain (DB)": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "6c6f2b97-7131-485e-9868-f0a45d56df27",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "cde8297c4f21e98039ed68ff47c28bab8cbe9079601f340d042d351e31437015"
+  },
+  "id": "Qgcm5sWUFfEKt668",
+  "tags": []
+}
